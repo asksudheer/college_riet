@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <h2><i class="fas fa-tachometer-alt"></i> Staff Dashboard</h2>
+        <p class="text-muted">Welcome to the staff portal. Here's an overview of current activities.</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h5>Total Students</h5>
+                        <h2>{{ total_students }}</h2>
+                    </div>
+                    <div>
+                        <i class="fas fa-users fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h5>Total Staff</h5>
+                        <h2>{{ total_staff }}</h2>
+                    </div>
+                    <div>
+                        <i class="fas fa-chalkboard-teacher fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card bg-warning text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h5>Pending Approvals</h5>
+                        <h2>{{ pending_fee_approvals }}</h2>
+                    </div>
+                    <div>
+                        <i class="fas fa-clock fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h5>Today's Events</h5>
+                        <h2>{{ today_events }}</h2>
+                    </div>
+                    <div>
+                        <i class="fas fa-calendar fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-tasks"></i> Quick Actions</h5>
+            </div>
+            <div class="card-body">
+                <div class="list-group list-group-flush">
+                    <a href="{{ url_for('staff.add_examination') }}" class="list-group-item list-group-item-action">
+                        <i class="fas fa-plus text-primary"></i> Add New Examination
+                    </a>
+                    <a href="{{ url_for('staff.fee_payments') }}" class="list-group-item list-group-item-action">
+                        <i class="fas fa-check text-success"></i> Review Fee Payments
+                    </a>
+                    <a href="{{ url_for('staff.attendance') }}" class="list-group-item list-group-item-action">
+                        <i class="fas fa-calendar-check text-info"></i> Mark Attendance
+                    </a>
+                    <a href="{{ url_for('staff.add_event') }}" class="list-group-item list-group-item-action">
+                        <i class="fas fa-calendar-plus text-warning"></i> Create Event
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-bell"></i> Recent Activities</h5>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i> System notifications and recent activities will be displayed here.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

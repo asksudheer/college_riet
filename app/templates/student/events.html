@@ -1,0 +1,264 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <h2><i class="fas fa-calendar-alt"></i> College Events</h2>
+        <p class="text-muted">Stay updated with current and upcoming college events</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-star"></i> Upcoming Events</h5>
+            </div>
+            <div class="card-body">
+                {% if current_events %}
+                    <div class="row">
+                        {% for event in current_events %}
+                            <div class="col-md-6 mb-3">
+                                <div class="card h-100 border-{% if event.event_type == 'academic' %}primary{% elif event.event_type == 'cultural' %}success{% elif event.event_type == 'sports' %}warning{% else %}info{% endif %}">
+                                    <div class="card-header bg-{% if event.event_type == 'academic' %}primary{% elif event.event_type == 'cultural' %}success{% elif event.event_type == 'sports' %}warning{% else %}info{% endif %} text-white">
+                                        <h6 class="mb-0">{{ event.title }}</h6>
+                                        <small>{{ event.event_type.title() }} Event</small>
+                                    </div>
+                                    <div class="card-body">
+                                        <p class="card-text">{{ event.description[:150] }}{% if event.description|length > 150 %}...{% endif %}</p>
+                                        
+                                        <div class="row">
+                                            <div class="col-6">
+                                                <strong><i class="fas fa-calendar"></i> Date:</strong><br>
+                                                <span class="text-muted">{{ event.event_date.strftime('%d %B %Y') }}</span>
+                                            </div>
+                                            {% if event.start_time %}
+                                                <div class="col-6">
+                                                    <strong><i class="fas fa-clock"></i> Time:</strong><br>
+                                                    <span class="text-muted">
+                                                        {{ event.start_time.strftime('%H:%M') }}
+                                                        {% if event.end_time %} - {{ event.end_time.strftime('%H:%M') }}{% endif %}
+                                                    </span>
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                        
+                                        {% if event.venue %}
+                                            <div class="mt-2">
+                                                <strong><i class="fas fa-map-marker-alt"></i> Venue:</strong><br>
+                                                <span class="text-muted">{{ event.venue }}</span>
+                                            </div>
+                                        {% endif %}
+                                        
+                                        {% if event.target_audience %}
+                                            <div class="mt-2">
+                                                <strong><i class="fas fa-users"></i> For:</strong><br>
+                                                <span class="text-muted">{{ event.target_audience.title() }}</span>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="card-footer">
+                                        <small class="text-muted">
+                                            <i class="fas fa-user"></i> Organized by {{ event.creator.first_name }} {{ event.creator.last_name }}
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i> No upcoming events at the moment. Check back later for new announcements!
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if past_events %}
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-history"></i> Recent Past Events</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Event</th>
+                                    <th>Type</th>
+                                    <th>Date</th>
+                                    <th>Venue</th>
+                                    <th>Organizer</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for event in past_events %}
+                                    <tr>
+                                        <td>
+                                            <strong>{{ event.title }}</strong><br>
+                                            <small class="text-muted">{{ event.description[:80] }}{% if event.description|length > 80 %}...{% endif %}</small>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-{% if event.event_type == 'academic' %}primary{% elif event.event_type == 'cultural' %}success{% elif event.event_type == 'sports' %}warning{% else %}info{% endif %}">
+                                                {{ event.event_type.title() }}
+                                            </span>
+                                        </td>
+                                        <td>{{ event.event_date.strftime('%d %b %Y') }}</td>
+                                        <td>{{ event.venue or '-' }}</td>
+                                        <td>{{ event.creator.first_name }} {{ event.creator.last_name }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endif %}
+
+<div class="row mt-4">
+    <div class="col-md-4">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <h5><i class="fas fa-graduation-cap"></i> Academic Events</h5>
+                <p class="mb-0">Seminars, workshops, guest lectures, and academic competitions.</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <h5><i class="fas fa-music"></i> Cultural Events</h5>
+                <p class="mb-0">Cultural festivals, talent shows, music and dance competitions.</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card bg-warning text-white">
+            <div class="card-body">
+                <h5><i class="fas fa-trophy"></i> Sports Events</h5>
+                <p class="mb-0">Sports tournaments, inter-college competitions, and fitness events.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-calendar"></i> Event Calendar Overview</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-8">
+                        <canvas id="eventChart" width="400" height="200"></canvas>
+                    </div>
+                    <div class="col-md-4">
+                        <h6>Event Statistics</h6>
+                        <ul class="list-unstyled">
+                            <li class="mb-2">
+                                <i class="fas fa-circle text-primary"></i> Academic: {{ current_events | selectattr('event_type', 'equalto', 'academic') | list | length }}
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-circle text-success"></i> Cultural: {{ current_events | selectattr('event_type', 'equalto', 'cultural') | list | length }}
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-circle text-warning"></i> Sports: {{ current_events | selectattr('event_type', 'equalto', 'sports') | list | length }}
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-circle text-info"></i> Others: {{ current_events | rejectattr('event_type', 'in', ['academic', 'cultural', 'sports']) | list | length }}
+                            </li>
+                        </ul>
+                        
+                        <div class="mt-3">
+                            <h6>Quick Info</h6>
+                            <p class="small text-muted">
+                                Stay connected with college announcements through the official notice board and this events page. 
+                                Mark your calendar for important dates!
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <h5><i class="fas fa-bell"></i> Event Notifications</h5>
+                <ul class="list-unstyled mb-0">
+                    <li><i class="fas fa-check"></i> Check events page regularly for updates</li>
+                    <li><i class="fas fa-check"></i> Follow college social media for announcements</li>
+                    <li><i class="fas fa-check"></i> Register early for limited seat events</li>
+                    <li><i class="fas fa-check"></i> Contact organizers for more details</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card bg-secondary text-white">
+            <div class="card-body">
+                <h5><i class="fas fa-question-circle"></i> Event Guidelines</h5>
+                <ul class="list-unstyled mb-0">
+                    <li><i class="fas fa-check"></i> Bring student ID for all events</li>
+                    <li><i class="fas fa-check"></i> Follow dress code if specified</li>
+                    <li><i class="fas fa-check"></i> Arrive on time for better seating</li>
+                    <li><i class="fas fa-check"></i> Respect event rules and organizers</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Create event distribution chart
+    const ctx = document.getElementById('eventChart');
+    if (ctx) {
+        const chart = new Chart(ctx.getContext('2d'), {
+            type: 'pie',
+            data: {
+                labels: ['Academic', 'Cultural', 'Sports', 'Others'],
+                datasets: [{
+                    data: [
+                        {{ current_events | selectattr('event_type', 'equalto', 'academic') | list | length }},
+                        {{ current_events | selectattr('event_type', 'equalto', 'cultural') | list | length }},
+                        {{ current_events | selectattr('event_type', 'equalto', 'sports') | list | length }},
+                        {{ current_events | rejectattr('event_type', 'in', ['academic', 'cultural', 'sports']) | list | length }}
+                    ],
+                    backgroundColor: [
+                        '#007bff',
+                        '#28a745',
+                        '#ffc107',
+                        '#17a2b8'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

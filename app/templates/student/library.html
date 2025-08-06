@@ -1,0 +1,218 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <h2><i class="fas fa-book"></i> Digital Library</h2>
+        <p class="text-muted">Access academic resources, books, and previous exam papers</p>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-filter"></i> Filter Resources</h5>
+            </div>
+            <div class="card-body">
+                <form method="GET" class="row g-3">
+                    <div class="col-md-4">
+                        <label for="subject" class="form-label">Subject</label>
+                        <select name="subject" id="subject" class="form-select">
+                            <option value="">All Subjects</option>
+                            {% for subject in subjects %}
+                                <option value="{{ subject }}" {% if current_subject == subject %}selected{% endif %}>{{ subject }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="type" class="form-label">Resource Type</label>
+                        <select name="type" id="type" class="form-select">
+                            <option value="">All Types</option>
+                            {% for resource_type in resource_types %}
+                                <option value="{{ resource_type }}" {% if current_type == resource_type %}selected{% endif %}>
+                                    {{ resource_type.replace('_', ' ').title() }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">&nbsp;</label>
+                        <div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-search"></i> Filter
+                            </button>
+                            <a href="{{ url_for('student.library') }}" class="btn btn-outline-secondary">
+                                <i class="fas fa-times"></i> Clear
+                            </a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    {% if resources %}
+        {% for resource in resources %}
+            <div class="col-md-6 mb-3">
+                <div class="card h-100">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h6 class="mb-0">{{ resource.title }}</h6>
+                        <span class="badge {% if resource.resource_type == 'book' %}bg-primary{% elif resource.resource_type == 'exam_paper' %}bg-success{% elif resource.resource_type == 'notes' %}bg-info{% else %}bg-secondary{% endif %}">
+                            {{ resource.resource_type.replace('_', ' ').title() }}
+                        </span>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text">{{ resource.description[:100] }}{% if resource.description|length > 100 %}...{% endif %}</p>
+                        
+                        <div class="row text-small">
+                            <div class="col-6">
+                                <strong>Subject:</strong><br>
+                                <span class="text-muted">{{ resource.subject }}</span>
+                            </div>
+                            <div class="col-6">
+                                <strong>Course:</strong><br>
+                                <span class="text-muted">{{ resource.course }}</span>
+                            </div>
+                        </div>
+                        
+                        {% if resource.author %}
+                            <div class="mt-2">
+                                <strong>Author:</strong> <span class="text-muted">{{ resource.author }}</span>
+                            </div>
+                        {% endif %}
+                        
+                        {% if resource.year and resource.semester %}
+                            <div class="mt-1">
+                                <strong>For:</strong> <span class="text-muted">Year {{ resource.year }}, Semester {{ resource.semester }}</span>
+                            </div>
+                        {% endif %}
+                        
+                        <div class="mt-2">
+                            <small class="text-muted">
+                                <i class="fas fa-calendar"></i> Added on {{ resource.added_at.strftime('%Y-%m-%d') }}
+                            </small>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <a href="{{ url_for('student.access_resource', resource_id=resource.id) }}" class="btn btn-primary btn-sm">
+                            <i class="fas fa-download"></i> Access Resource
+                        </a>
+                        {% if resource.resource_type == 'exam_paper' %}
+                            <span class="badge bg-warning text-dark ms-2">
+                                <i class="fas fa-file-alt"></i> Previous Year Paper
+                            </span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class="col-12">
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle"></i> No resources found matching your criteria. Try different filters or check back later.
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+{% if resources %}
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-chart-pie"></i> Resource Distribution</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <canvas id="resourceChart" width="400" height="200"></canvas>
+                        </div>
+                        <div class="col-md-4">
+                            <h6>Quick Stats</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-book text-primary"></i> Books: {{ resources | selectattr('resource_type', 'equalto', 'book') | list | length }}</li>
+                                <li><i class="fas fa-file-alt text-success"></i> Exam Papers: {{ resources | selectattr('resource_type', 'equalto', 'exam_paper') | list | length }}</li>
+                                <li><i class="fas fa-sticky-note text-info"></i> Notes: {{ resources | selectattr('resource_type', 'equalto', 'notes') | list | length }}</li>
+                                <li><i class="fas fa-file text-secondary"></i> Others: {{ resources | rejectattr('resource_type', 'in', ['book', 'exam_paper', 'notes']) | list | length }}</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endif %}
+
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <h5><i class="fas fa-lightbulb"></i> Study Tips</h5>
+                <ul class="list-unstyled mb-0">
+                    <li><i class="fas fa-check"></i> Download exam papers before exams</li>
+                    <li><i class="fas fa-check"></i> Practice with previous year papers</li>
+                    <li><i class="fas fa-check"></i> Read reference books for better understanding</li>
+                    <li><i class="fas fa-check"></i> Take notes while studying</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <h5><i class="fas fa-info-circle"></i> Library Guidelines</h5>
+                <ul class="list-unstyled mb-0">
+                    <li><i class="fas fa-check"></i> Resources are organized by subject and year</li>
+                    <li><i class="fas fa-check"></i> Use filters to find specific materials</li>
+                    <li><i class="fas fa-check"></i> All downloads are tracked for analysis</li>
+                    <li><i class="fas fa-check"></i> Report any issues to the library staff</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Create resource distribution chart
+    const ctx = document.getElementById('resourceChart');
+    if (ctx) {
+        const chart = new Chart(ctx.getContext('2d'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Books', 'Exam Papers', 'Notes', 'Others'],
+                datasets: [{
+                    data: [
+                        {{ resources | selectattr('resource_type', 'equalto', 'book') | list | length }},
+                        {{ resources | selectattr('resource_type', 'equalto', 'exam_paper') | list | length }},
+                        {{ resources | selectattr('resource_type', 'equalto', 'notes') | list | length }},
+                        {{ resources | rejectattr('resource_type', 'in', ['book', 'exam_paper', 'notes']) | list | length }}
+                    ],
+                    backgroundColor: [
+                        '#007bff',
+                        '#28a745',
+                        '#17a2b8',
+                        '#6c757d'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

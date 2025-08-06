@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="jumbotron bg-primary text-white rounded p-5 mb-4">
+    <h1 class="display-4">Welcome to College Management System</h1>
+    <p class="lead">A comprehensive solution for managing college operations, student information, and academic processes.</p>
+    {% if not current_user.is_authenticated %}
+        <a class="btn btn-light btn-lg" href="{{ url_for('auth.login') }}" role="button">
+            <i class="fas fa-sign-in-alt"></i> Login to Continue
+        </a>
+    {% endif %}
+</div>
+
+{% if not current_user.is_authenticated %}
+<div class="alert alert-info">
+    <h5><i class="fas fa-info-circle"></i> Demo Login Credentials</h5>
+    <div class="row">
+        <div class="col-md-4">
+            <strong>Principal:</strong><br>
+            Username: <code>principal</code><br>
+            Password: <code>principal123</code>
+        </div>
+        <div class="col-md-4">
+            <strong>Staff:</strong><br>
+            Username: <code>staff1</code><br>
+            Password: <code>staff123</code>
+        </div>
+        <div class="col-md-4">
+            <strong>Student:</strong><br>
+            Username: <code>teststudent</code><br>
+            Password: <code>test123</code>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title"><i class="fas fa-users text-primary"></i> Student Portal</h5>
+                <p class="card-text">Access your academic information, attendance records, library resources, and upcoming events.</p>
+                <ul class="list-unstyled">
+                    <li><i class="fas fa-check text-success"></i> View attendance records</li>
+                    <li><i class="fas fa-check text-success"></i> Access academic results</li>
+                    <li><i class="fas fa-check text-success"></i> Browse library resources</li>
+                    <li><i class="fas fa-check text-success"></i> Check college events</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title"><i class="fas fa-chalkboard-teacher text-success"></i> Staff Portal</h5>
+                <p class="card-text">Manage examinations, track attendance, handle fee approvals, and organize events.</p>
+                <ul class="list-unstyled">
+                    <li><i class="fas fa-check text-success"></i> Manage examinations</li>
+                    <li><i class="fas fa-check text-success"></i> Track student attendance</li>
+                    <li><i class="fas fa-check text-success"></i> Process fee payments</li>
+                    <li><i class="fas fa-check text-success"></i> Organize events</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title"><i class="fas fa-bus text-warning"></i> Transportation</h5>
+                <p class="card-text">Comprehensive bus route management with real-time availability and subscription tracking.</p>
+                <ul class="list-unstyled">
+                    <li><i class="fas fa-check text-success"></i> Route management</li>
+                    <li><i class="fas fa-check text-success"></i> Bus availability</li>
+                    <li><i class="fas fa-check text-success"></i> Fee calculation</li>
+                    <li><i class="fas fa-check text-success"></i> Subscription tracking</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title"><i class="fas fa-credit-card text-info"></i> Fee Management</h5>
+                <p class="card-text">Streamlined fee payment process with two-level approval system for secure and transparent transactions.</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title"><i class="fas fa-book text-secondary"></i> Digital Library</h5>
+                <p class="card-text">Access to academic resources, previous exam papers, and course materials organized by subject and year.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,182 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <h2><i class="fas fa-calendar-check"></i> Attendance Records</h2>
+        <p class="text-muted">Your attendance summary and detailed records</p>
+    </div>
+</div>
+
+<div class="row">
+    {% for subject, data in subject_attendance.items() %}
+        <div class="col-md-6 mb-3">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0">{{ subject }}</h6>
+                    <span class="badge {% if data.percentage >= 75 %}bg-success{% elif data.percentage >= 60 %}bg-warning{% else %}bg-danger{% endif %}">
+                        {{ "%.1f"|format(data.percentage) }}%
+                    </span>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-6">
+                            <small class="text-muted">Present</small>
+                            <div class="h5 text-success">{{ data.present }}</div>
+                        </div>
+                        <div class="col-6">
+                            <small class="text-muted">Total Classes</small>
+                            <div class="h5">{{ data.total }}</div>
+                        </div>
+                    </div>
+                    <div class="progress mt-2">
+                        <div class="progress-bar {% if data.percentage >= 75 %}bg-success{% elif data.percentage >= 60 %}bg-warning{% else %}bg-danger{% endif %}" 
+                             style="width: {{ data.percentage }}%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+    
+    {% if not subject_attendance %}
+        <div class="col-12">
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle"></i> No attendance records found.
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-list"></i> Detailed Attendance Records</h5>
+            </div>
+            <div class="card-body">
+                {% if attendance_records %}
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Subject</th>
+                                    <th>Status</th>
+                                    <th>Remarks</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for record in attendance_records[:20] %}
+                                    <tr>
+                                        <td>{{ record.date.strftime('%Y-%m-%d') }}</td>
+                                        <td>{{ record.subject }}</td>
+                                        <td>
+                                            {% if record.status == 'present' %}
+                                                <span class="badge bg-success"><i class="fas fa-check"></i> Present</span>
+                                            {% elif record.status == 'absent' %}
+                                                <span class="badge bg-danger"><i class="fas fa-times"></i> Absent</span>
+                                            {% elif record.status == 'late' %}
+                                                <span class="badge bg-warning"><i class="fas fa-clock"></i> Late</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ record.remarks or '-' }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    {% if attendance_records|length > 20 %}
+                        <div class="text-center mt-3">
+                            <small class="text-muted">Showing last 20 records out of {{ attendance_records|length }}</small>
+                        </div>
+                    {% endif %}
+                {% else %}
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i> No detailed attendance records available.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-chart-bar"></i> Attendance Chart</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="attendanceChart" width="400" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Create attendance chart
+    const ctx = document.getElementById('attendanceChart').getContext('2d');
+    
+    // Sample data - in a real app, this would come from the API
+    const subjects = [{% for subject in subject_attendance.keys() %}'{{ subject }}'{% if not loop.last %},{% endif %}{% endfor %}];
+    const percentages = [{% for data in subject_attendance.values() %}{{ "%.1f"|format(data.percentage) }}{% if not loop.last %},{% endif %}{% endfor %}];
+    
+    const chart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: subjects,
+            datasets: [{
+                label: 'Attendance Percentage',
+                data: percentages,
+                backgroundColor: [
+                    'rgba(54, 162, 235, 0.6)',
+                    'rgba(255, 99, 132, 0.6)',
+                    'rgba(255, 205, 86, 0.6)',
+                    'rgba(75, 192, 192, 0.6)',
+                    'rgba(153, 102, 255, 0.6)',
+                ],
+                borderColor: [
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(255, 205, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)',
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100,
+                    ticks: {
+                        callback: function(value) {
+                            return value + '%';
+                        }
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return context.parsed.y.toFixed(1) + '%';
+                        }
+                    }
+                }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,238 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <h2><i class="fas fa-graduation-cap"></i> Academic Performance</h2>
+        <p class="text-muted">Your exam results and academic progress</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-info-circle"></i> Student Information</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        <strong>Course:</strong> {{ student.course }}
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Current Year:</strong> Year {{ student.year }}
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Current Semester:</strong> Semester {{ student.semester }}
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Student ID:</strong> {{ student.student_id }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    {% for semester, performance in semester_performance.items() %}
+        <div class="col-md-6 mb-3">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0">{{ semester }}</h6>
+                    <span class="badge {% if performance.percentage >= 80 %}bg-success{% elif performance.percentage >= 60 %}bg-warning{% else %}bg-danger{% endif %}">
+                        {{ "%.1f"|format(performance.percentage) }}%
+                    </span>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-6">
+                            <small class="text-muted">Obtained Marks</small>
+                            <div class="h6">{{ performance.obtained_marks }}</div>
+                        </div>
+                        <div class="col-6">
+                            <small class="text-muted">Total Marks</small>
+                            <div class="h6">{{ performance.total_marks }}</div>
+                        </div>
+                    </div>
+                    <small class="text-muted">Subjects: {{ performance.subjects }}</small>
+                    <div class="progress mt-2">
+                        <div class="progress-bar {% if performance.percentage >= 80 %}bg-success{% elif performance.percentage >= 60 %}bg-warning{% else %}bg-danger{% endif %}" 
+                             style="width: {{ performance.percentage }}%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+    
+    {% if not semester_performance %}
+        <div class="col-12">
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle"></i> No semester performance data available yet.
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-clipboard-list"></i> Detailed Exam Results</h5>
+            </div>
+            <div class="card-body">
+                {% if exam_results %}
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Exam Date</th>
+                                    <th>Exam Name</th>
+                                    <th>Subject</th>
+                                    <th>Max Marks</th>
+                                    <th>Obtained</th>
+                                    <th>Percentage</th>
+                                    <th>Grade</th>
+                                    <th>Remarks</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for result in exam_results %}
+                                    <tr>
+                                        <td>{{ result.examination.exam_date.strftime('%Y-%m-%d') }}</td>
+                                        <td>{{ result.examination.name }}</td>
+                                        <td>{{ result.examination.subject }}</td>
+                                        <td>{{ result.examination.max_marks }}</td>
+                                        <td>{{ result.marks_obtained }}</td>
+                                        <td>
+                                            {% set percentage = (result.marks_obtained / result.examination.max_marks * 100) %}
+                                            {{ "%.1f"|format(percentage) }}%
+                                        </td>
+                                        <td>
+                                            {% if result.grade %}
+                                                <span class="badge {% if result.grade in ['A', 'A+'] %}bg-success{% elif result.grade in ['B', 'B+'] %}bg-primary{% elif result.grade in ['C', 'C+'] %}bg-warning{% else %}bg-danger{% endif %}">
+                                                    {{ result.grade }}
+                                                </span>
+                                            {% else %}
+                                                -
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ result.remarks or '-' }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i> No exam results available yet.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-chart-line"></i> Performance Chart</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="performanceChart" width="400" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <h5><i class="fas fa-trophy"></i> Academic Achievements</h5>
+                <ul class="list-unstyled mb-0">
+                    {% if semester_performance %}
+                        {% for semester, performance in semester_performance.items() %}
+                            {% if performance.percentage >= 85 %}
+                                <li><i class="fas fa-star"></i> Excellent Performance in {{ semester }}</li>
+                            {% elif performance.percentage >= 75 %}
+                                <li><i class="fas fa-medal"></i> Good Performance in {{ semester }}</li>
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
+                    {% if not semester_performance or not semester_performance.values() | selectattr('percentage', '>=', 75) | list %}
+                        <li><i class="fas fa-info-circle"></i> Keep working hard for better results!</li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <h5><i class="fas fa-target"></i> Academic Goals</h5>
+                <ul class="list-unstyled mb-0">
+                    <li><i class="fas fa-check"></i> Maintain above 75% attendance</li>
+                    <li><i class="fas fa-check"></i> Achieve 80%+ marks in all subjects</li>
+                    <li><i class="fas fa-check"></i> Complete all assignments on time</li>
+                    <li><i class="fas fa-check"></i> Participate in extracurricular activities</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Create performance chart
+    const ctx = document.getElementById('performanceChart').getContext('2d');
+    
+    // Sample data for semester performance
+    const semesters = [{% for semester in semester_performance.keys() %}'{{ semester }}'{% if not loop.last %},{% endif %}{% endfor %}];
+    const percentages = [{% for performance in semester_performance.values() %}{{ "%.1f"|format(performance.percentage) }}{% if not loop.last %},{% endif %}{% endfor %}];
+    
+    const chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: semesters,
+            datasets: [{
+                label: 'Academic Performance (%)',
+                data: percentages,
+                borderColor: 'rgb(75, 192, 192)',
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                tension: 0.1,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100,
+                    ticks: {
+                        callback: function(value) {
+                            return value + '%';
+                        }
+                    }
+                }
+            },
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return 'Performance: ' + context.parsed.y.toFixed(1) + '%';
+                        }
+                    }
+                }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}
